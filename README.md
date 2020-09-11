@@ -18,6 +18,43 @@ $ npm run start
 # generate static project
 $ npm run generate
 ```
+## 文件目录
+```
+├── README.md
+├── app.html     #模板
+├── assets       #静态文件
+│   ├── README.md
+│   ├── avatar.png
+│   └── example.png
+├── components
+│   ├── Logo.vue
+│   └── README.md
+├── jest.config.js
+├── layouts      #布局，可以放公共部分，比如navbar
+│   ├── README.md
+│   └── default.vue
+├── middleware
+│   └── README.md
+├── nuxt.config.js
+├── package-lock.json
+├── package.json
+├── pages        #页面文件，在此目录的vue会生成对应路由
+│   ├── README.md
+│   ├── contact.vue
+│   └── index.vue
+├── plugins        #插件
+│   ├── README.md
+│   ├── antd-ui.js  #antd-ui
+│   ├── sensitive-word-detection.js #敏感词检测
+│   └── socket-io.js #socket-io
+├── static
+│   ├── README.md
+│   └── favicon.ico
+├── store
+│   └── README.md
+└── test
+    └── Logo.spec.js
+```
 
 ## socket server
 
