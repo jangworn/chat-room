@@ -20,6 +20,7 @@
     "babel-core": "7.0.0-bridge.0",
     "babel-jest": "^26.1.0",
     "jest": "^26.1.0",
+    "js-cookie": "^2.2.1",
     "vue-jest": "^3.0.4",
     "vue-socket.io": "^3.0.10"
   }

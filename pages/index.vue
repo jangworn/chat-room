@@ -39,6 +39,7 @@
 </template>
 
 <script>
+import Cookies from 'js-cookie'
 export default {
   data() {
     return {
@@ -59,7 +60,7 @@ export default {
       this.inputDisplay = false;
       this.messageDisplay = true;
       let sender = window.btoa(window.encodeURIComponent(this.nickname));
-      localStorage.setItem("sender", sender);
+      Cookies.set("sender", sender);
       this.sender = sender;
       this.$socket.emit("enterRoom", { id: sender });
     },
@@ -77,7 +78,7 @@ export default {
     },
   },
   mounted() {
-    let sender = localStorage.getItem("sender");
+    let sender = Cookies.get("sender");
     console.log("进入聊天室", sender);
     if (sender) {
       this.inputDisplay = false;

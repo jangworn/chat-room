@@ -24,7 +24,7 @@ $ npm run generate
 [gf-admin-api](https://github.com/jangworn/gf-admin-api)
 
 ## example
-This is an [example link](https://johnyn.com/chat-room/).  
+This is an [example link](http://johnyn.com:8080/chat-room/).  
 
 在不同的多个浏览器窗口打开即可测试多人聊天
 
