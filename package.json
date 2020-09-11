@@ -1,0 +1,26 @@
+{
+  "name": "nuxt-demo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate",
+    "test": "jest"
+  },
+  "dependencies": {
+    "ant-design-vue": "^1.6.4",
+    "nuxt": "^2.14.0",
+    "sass": "^1.26.10",
+    "sass-loader": "^10.0.2"
+  },
+  "devDependencies": {
+    "@vue/test-utils": "^1.0.3",
+    "babel-core": "7.0.0-bridge.0",
+    "babel-jest": "^26.1.0",
+    "jest": "^26.1.0",
+    "vue-jest": "^3.0.4",
+    "vue-socket.io": "^3.0.10"
+  }
+}
