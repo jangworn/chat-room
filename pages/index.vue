@@ -120,7 +120,7 @@ export default {
             window.atob(element.sender)
           );
           element.content = window.decodeURIComponent(
-            window.atob(element.content)
+            element.content
           );
         });
       }
