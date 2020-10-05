@@ -1,45 +1,195 @@
 <template>
   <div class="main">
     <div class="input-name" v-show="inputDisplay">
-      <a-input placeholder="输入昵称后按回车进入聊天室" v-model="nickname" @keyup.enter="setName" />
+      <a-input
+        placeholder="输入昵称后按回车进入聊天室"
+        v-model="nickname"
+        @keyup.enter="setName"
+      />
     </div>
 
     <div v-show="messageDisplay">
-      <div class="room-len">当前房间在线人数：{{roomLen}}</div>
-      <div class="message-box" id="scroll-box">
-        <div class="scroll_content">
-          <ul>
-            <li v-for="(item,index) in records" :key="index">
-              <p class="time">
-                <span>{{ item.time }}</span>
-              </p>
-              <div :class="{ self: item.self }" class>
-                <div class="nickname">{{ item.nickname }}</div>
-                <img src="~/assets/avatar.png" class="avatar" width="30" height="30" />
-                <div class="text">
-                  <span v-html="item.content" />
+      <a-tabs
+        default-active-key="1"
+        tab-position="left"
+        type="line"
+        @change="callback"
+      >
+        <a-tab-pane key="1">
+          <span slot="tab">
+            <a-icon type="message" />
+          </span>
+          <a-layout id="sider">
+            <a-layout-sider :trigger="null" collapsible>
+              <a-row class="input-row">
+                <a-col :span="20">
+                  <a-input-search
+                    class="search-input"
+                    style="width: 95%"
+                    placeholder="搜索"
+                    @search="onSearch"
+                  />
+                </a-col>
+                <a-col :span="4">
+                  <a-button :size="size" icon="plus" />
+                </a-col>
+              </a-row>
+
+              <a-menu
+                theme="light"
+                mode="inline"
+                :default-selected-keys="[]"
+                @click="handleClick"
+              >
+                <a-menu-item key="1">
+                  <a-icon type="user" />
+                  <span>群聊 1</span>
+                </a-menu-item>
+                <a-menu-item key="2">
+                  <a-icon type="video-camera" />
+                  <span>群聊 2</span>
+                </a-menu-item>
+                <a-menu-item key="3">
+                  <a-icon type="upload" />
+                  <span>群聊 3</span>
+                </a-menu-item>
+              </a-menu>
+            </a-layout-sider>
+            <a-layout>
+              <!--  <a-layout-header style="background: #fff; padding: 0">
+          </a-layout-header> -->
+              <a-layout-content>
+                <div class="room-len">当前房间在线人数：{{ roomLen }}</div>
+                <div class="message-box" id="scroll-box">
+                  <div class="scroll_content">
+                    <ul>
+                      <li v-for="(item, index) in records" :key="index">
+                        <p class="time">
+                          <span>{{ item.time }}</span>
+                        </p>
+                        <div :class="{ self: item.self }" class>
+                          <div class="nickname">{{ item.nickname }}</div>
+                          <img
+                            src="~/assets/avatar.png"
+                            class="avatar"
+                            width="30"
+                            height="30"
+                            @click="handlerAddFrind(item.sender)"
+                          />
+                          <div class="text">
+                            <span v-html="item.content" />
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
-      <div class="input-box">
-        <div class="chat_edit">
-          <div class="chat_edit_input">
-            <div>
-              <textarea v-model="content" :rows="6" placeholder="请输入内容" @keyup.enter="sendReply" />
-            </div>
-          </div>
-          <div class="chat_edit_footer">按Enter发送，Ctrl+Enter换行</div>
-        </div>
-      </div>
+                <div class="input-box">
+                  <div class="chat_edit">
+                    <div class="chat_edit_input">
+                      <div>
+                        <textarea
+                          v-model="content"
+                          :rows="6"
+                          placeholder="请输入内容"
+                          @keyup.enter="speak"
+                        />
+                      </div>
+                    </div>
+                    <div class="chat_edit_footer">
+                      按Enter发送，Ctrl+Enter换行
+                    </div>
+                  </div>
+                </div>
+              </a-layout-content>
+            </a-layout>
+          </a-layout>
+        </a-tab-pane>
+        <a-tab-pane key="2" force-render>
+          <span slot="tab">
+            <a-icon type="contacts" />
+          </span>
+          <a-layout id="sider">
+            <a-layout-sider :trigger="null" collapsible>
+              <a-menu
+                theme="light"
+                mode="inline"
+                :default-selected-keys="[]"
+                @click="handleClickList"
+              >
+                <a-menu-item key="0">
+                  <a-icon type="user-add" />
+                  <span>新的好友</span>
+                </a-menu-item>
+                <a-menu-item key="1">
+                  <a-icon type="user" />
+                  <span>我的好友</span>
+                </a-menu-item>
+                <a-menu-item key="2">
+                  <a-icon type="team" />
+                  <span>我的群聊</span>
+                </a-menu-item>
+              </a-menu>
+            </a-layout-sider>
+            <a-layout>
+              <a-layout-content>
+                <a-list bordered :data-source="friendshipData">
+                  <a-list-item slot="renderItem" slot-scope="item, index">
+                    <a-list-item-meta
+                      v-if="item.status == 0"
+                      :description="item.message"
+                    >
+                      <a slot="title">{{ item.applicant }} </a>
+                      <a-avatar
+                        slot="avatar"
+                        src="/chat-room/_nuxt/assets/avatar.png"
+                      />
+                    </a-list-item-meta>
+                    <a-list-item-meta v-else>
+                      <a slot="title">{{ item.applicant }} </a>
+                      <a-avatar
+                        slot="avatar"
+                        src="/chat-room/_nuxt/assets/avatar.png"
+                      />
+                    </a-list-item-meta>
+                    <div v-if="item.status == 0">
+                      <a-button type="primary" @click="aggree(item)">
+                        同意
+                      </a-button>
+                    </div>
+                    <div v-else>
+                      <a-button type="primary" @click="unfriend(item)">
+                        删除好友
+                      </a-button>
+                    </div>
+                  </a-list-item>
+                  <div slot="header">{{ headerContent }}</div>
+                </a-list>
+              </a-layout-content>
+            </a-layout>
+          </a-layout>
+        </a-tab-pane>
+      </a-tabs>
+
+      <a-modal
+        v-model="modalVisible"
+        title="用户"
+        centered
+        :footer="null"
+        @ok="() => (modalVisible = false)"
+      >
+        <p>个性签名</p>
+        <p>
+          <a-input placeholder="你好，我是xxx" v-model="newFriendMessage" />
+        </p>
+        <p><a-button type="primary" @click="addFrind"> 加好友 </a-button></p>
+      </a-modal>
     </div>
   </div>
 </template>
 
 <script>
-import Cookies from 'js-cookie'
+import Cookies from "js-cookie";
 export default {
   data() {
     return {
@@ -52,8 +202,17 @@ export default {
       loading: false,
       more_text_display: true,
       avatar: "~/assets/avatar.png",
-      roomLen:0
+      roomLen: 0,
+      roomId: undefined,
+      modalVisible: false,
+      newFriend: undefined,
+      newFriendMessage: "",
+      friendshipData: [],
+      headerContent: "",
     };
+  },
+  watch: {
+    roomId: function (e) {},
   },
   methods: {
     setName() {
@@ -64,17 +223,84 @@ export default {
       this.sender = sender;
       this.$socket.emit("enterRoom", { id: sender });
     },
-    sendReply() {
-      let isSeensitive = this.$myInjectedFunction(this.content)
-      if(isSeensitive){
-         this.$message.warning('输入内容包含敏感词');
-         return false;
+    speak() {
+      let isSeensitive = this.$myInjectedFunction(this.content);
+      if (isSeensitive) {
+        this.$message.warning("输入内容包含敏感词");
+        return false;
       }
       this.$socket.emit("sendToRoom", {
         uid: this.sender,
         content: window.btoa(window.encodeURIComponent(this.content)),
+        roomId: !this.roomId ? 1 : this.roomId,
       });
       this.content = "";
+    },
+
+    onSearch: function () {},
+    handleClick: function (e) {
+      this.roomId = e.key;
+      this.$socket.emit("enterRoom", { uid: this.sender, roomId: this.roomId });
+    },
+    handlerAddFrind: function (e) {
+      this.modalVisible = true;
+      this.newFriend = e;
+    },
+    addFrind: function () {
+      this.$socket.emit("addFriend", {
+        applicant: this.sender,
+        respondent: this.newFriend,
+        message: this.newFriendMessage,
+      });
+    },
+    callback: function () {},
+    async handleClickList(e) {
+      if (e.key == 0) {
+        this.headerContent = "申请列表";
+      } else {
+        this.headerContent = "好友列表";
+      }
+
+      const list = await this.$axios.$get(
+        "http://localhost:8199/client/friendship?respondent=" +
+          this.sender +
+          "&status=" +
+          e.key
+      );
+      this.friendshipData = [];
+      if (list.data) {
+        this.friendshipData = list.data;
+      }
+    },
+    async aggree(row) {
+      let response = await this.$axios.$get(
+        "http://localhost:8199/client/aggree?id=" +
+          row.id +
+          "&respondent=" +
+          this.sender
+      );
+      if (response.code == 200) {
+        this.$message.success(response.message);
+        let index = this.friendshipData.indexOf(row);
+        this.friendshipData.splice(index, 1);
+      } else {
+        this.$message.error(response.message);
+      }
+    },
+    async unfriend(row) {
+      const response = await this.$axios.$get(
+        "http://localhost:8199/client/unfriend?id=" +
+          row.id +
+          "&respondent=" +
+          this.sender
+      );
+      if (response.code == 200) {
+        this.$message.success(response.message);
+        let index = this.friendshipData.indexOf(row);
+        this.friendshipData.splice(index, 1);
+      } else {
+        this.$message.error(response.message);
+      }
     },
   },
   mounted() {
@@ -84,9 +310,8 @@ export default {
       this.inputDisplay = false;
       this.messageDisplay = true;
       this.sender = sender;
-      this.$socket.emit("enterRoom", { id: sender });
+      this.$socket.emit("enterRoom", { uid: sender, roomId: 1 });
     }
-    
   },
 
   sockets: {
@@ -109,6 +334,7 @@ export default {
       }, 0);
     },
     initRoomData: function (msg) {
+      this.records = [];
       if (msg.length > 0) {
         msg.forEach((element) => {
           if (element.sender == this.sender) {
@@ -119,23 +345,20 @@ export default {
           element.nickname = window.decodeURIComponent(
             window.atob(element.sender)
           );
-          element.content = window.decodeURIComponent(
-            element.content
-          );
+          element.content = window.decodeURIComponent(element.content);
         });
       }
-     
+
       this.records = msg;
       setTimeout(() => {
         let oContent = document.getElementById("scroll-box");
-       
+
         oContent.scrollTop = oContent.scrollHeight;
       }, 0);
     },
-    roomLen:function(msg){
-      this.roomLen = msg
-    }
-    
+    roomLen: function (msg) {
+      this.roomLen = msg;
+    },
   },
 };
 </script>
@@ -149,14 +372,14 @@ export default {
   text-align: center;
 }
 .main {
-  padding: 10px;
   margin-top: 50px;
   min-height: 800px;
-  border: 1px solid #ccc;
-  background:#f5f5f5;
+  background: #f5f5f5;
+  border: 1px solid #f5f5f5;
+  box-shadow: 1px 1px 8px #b7b4b4;
 }
 .message-box {
-  height: 600px;
+  height: 592px;
   overflow: scroll;
   &::-webkit-scrollbar {
     width: 6px; /*高宽分别对应横竖滚动条的尺寸*/
@@ -172,9 +395,7 @@ export default {
     border-radius: 5px;
     background: transparent;
   }
-  
 }
-
 
 .title {
   font-family: "Quicksand", "Source Sans Pro", -apple-system, BlinkMacSystemFont,
@@ -313,9 +534,35 @@ textarea {
     }
   }
 }
-.room-len{
-  height:30px;
-  line-height: 30px;
+.avatar:hover {
+  cursor: pointer;
+}
+.room-len {
+  padding: 12px;
   border-bottom: 1px solid #ccc;
+}
+#sider {
+  min-height: 800px;
+}
+
+.search-input > .ant-input {
+  background: #f5f5f5;
+  border: none;
+  border-radius: 0;
+}
+.ant-layout {
+  background: none !important;
+}
+.ant-tabs .ant-tabs-left-content {
+  padding-left: 0 !important;
+}
+.ant-menu-inline .ant-menu-item {
+  margin-top: 0 !important;
+}
+.ant-layout-sider {
+  background: #fff !important;
+}
+.input-row{
+  padding:4px;
 }
 </style>
