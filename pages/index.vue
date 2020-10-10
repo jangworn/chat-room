@@ -31,7 +31,11 @@
                   />
                 </a-col>
                 <a-col :span="4">
-                  <a-button :size="size" icon="plus" />
+                  <a-button
+                   
+                    icon="plus"
+                    @click="handlerCreateChatroom"
+                  />
                 </a-col>
               </a-row>
 
@@ -43,7 +47,7 @@
               >
                 <a-menu-item key="1">
                   <a-icon type="user" />
-                  <span>群聊 1</span>
+                  <span>公共聊天室</span>
                 </a-menu-item>
                 <a-menu-item key="2">
                   <a-icon type="video-camera" />
@@ -184,6 +188,34 @@
         </p>
         <p><a-button type="primary" @click="addFrind"> 加好友 </a-button></p>
       </a-modal>
+      <a-modal
+        v-model="friendModalVisible"
+        title="创建群聊"
+        centered
+        cancelText="取消"
+        okText="确定"
+        @ok="createChatroom"
+      >
+        <a-row class="input-row">
+          <a-col :span="24">
+             <a-checkbox-group @change="onChange">
+              <a-list :data-source="friendshipData">
+                  <a-list-item slot="renderItem" slot-scope="item, index" >
+                    <a-checkbox :value="item.applicant">
+                      <a-list-item-meta>
+                      <span slot="title">{{ item.applicant }} </span>
+                      <a-avatar
+                        slot="avatar"
+                        src="/chat-room/_nuxt/assets/avatar.png"
+                      />
+                    </a-list-item-meta>
+                    </a-checkbox>
+                  </a-list-item>
+                </a-list>
+             </a-checkbox-group>
+          </a-col>
+        </a-row>
+      </a-modal>
     </div>
   </div>
 </template>
@@ -209,6 +241,8 @@ export default {
       newFriendMessage: "",
       friendshipData: [],
       headerContent: "",
+      friendModalVisible: false,
+      checkedFriends:[]
     };
   },
   watch: {
@@ -302,6 +336,30 @@ export default {
         this.$message.error(response.message);
       }
     },
+    async handlerCreateChatroom() {
+      this.friendModalVisible = true;
+      let list = await this.$axios.$get(
+        "http://localhost:8199/client/friendship?respondent=" +
+          this.sender +
+          "&status=1"
+      );
+      this.friendshipData = [];
+      if (list.data) {
+        this.friendshipData = list.data;
+      }
+    },
+    async createChatroom() {
+      let res = await this.$axios.$post(
+        "http://localhost:8199/client/createChatroom",
+        {
+          uid:this.sender,
+          checkedFriends:this.checkedFriends
+        }
+      );
+    },
+    onChange(checkedValues){
+      this.checkedFriends = checkedValues
+    }
   },
   mounted() {
     let sender = Cookies.get("sender");
@@ -359,6 +417,7 @@ export default {
     roomLen: function (msg) {
       this.roomLen = msg;
     },
+    
   },
 };
 </script>
@@ -562,7 +621,11 @@ textarea {
 .ant-layout-sider {
   background: #fff !important;
 }
-.input-row{
-  padding:4px;
+.input-row {
+  padding: 4px;
+}
+.ant-checkbox-wrapper> span{
+  display: inline-block;
+  float: left;
 }
 </style>
