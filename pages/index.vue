@@ -45,18 +45,12 @@
                 :default-selected-keys="[]"
                 @click="handleClick"
               >
-                <a-menu-item key="1">
-                  <a-icon type="user" />
-                  <span>公共聊天室</span>
+                 <template v-for="item in chatroomList">
+                  <a-menu-item :key="item.id">
+                  <a-icon type="user-add" />
+                  <span>{{item.name}}</span>
                 </a-menu-item>
-                <a-menu-item key="2">
-                  <a-icon type="video-camera" />
-                  <span>群聊 2</span>
-                </a-menu-item>
-                <a-menu-item key="3">
-                  <a-icon type="upload" />
-                  <span>群聊 3</span>
-                </a-menu-item>
+              </template>
               </a-menu>
             </a-layout-sider>
             <a-layout>
@@ -121,7 +115,7 @@
                 :default-selected-keys="[]"
                 @click="handleClickList"
               >
-                <a-menu-item key="0">
+               <a-menu-item key="0">
                   <a-icon type="user-add" />
                   <span>新的好友</span>
                 </a-menu-item>
@@ -133,6 +127,8 @@
                   <a-icon type="team" />
                   <span>我的群聊</span>
                 </a-menu-item>
+              
+               
               </a-menu>
             </a-layout-sider>
             <a-layout>
@@ -242,7 +238,8 @@ export default {
       friendshipData: [],
       headerContent: "",
       friendModalVisible: false,
-      checkedFriends:[]
+      checkedFriends:[],
+      chatroomList:[]
     };
   },
   watch: {
@@ -273,7 +270,7 @@ export default {
 
     onSearch: function () {},
     handleClick: function (e) {
-      this.roomId = e.key;
+      this.roomId = e.key.toString();
       this.$socket.emit("enterRoom", { uid: this.sender, roomId: this.roomId });
     },
     handlerAddFrind: function (e) {
@@ -356,6 +353,22 @@ export default {
           checkedFriends:this.checkedFriends
         }
       );
+      if(res.code == 200){
+         this.$message.success("操作成功");
+      }else{
+         this.$message.warning("操作失败");
+      }
+      this.friendModalVisible = false
+    },
+    async getChatroomList(e) {
+      const list = await this.$axios.$get(
+        "http://localhost:8199/client/getChatroomList?uid=" +
+          this.sender
+      );
+      this.chatroomList = [];
+      if (list.data) {
+        this.chatroomList = list.data;
+      }
     },
     onChange(checkedValues){
       this.checkedFriends = checkedValues
@@ -370,6 +383,7 @@ export default {
       this.sender = sender;
       this.$socket.emit("enterRoom", { uid: sender, roomId: 1 });
     }
+    this.getChatroomList()
   },
 
   sockets: {
