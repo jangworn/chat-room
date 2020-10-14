@@ -67,3 +67,7 @@ This is an [example link](http://johnyn.com:8080/chat-room/).
 
 ![example](assets/example.png)
 
+![example2](assets/example2.png)
+
+
+
